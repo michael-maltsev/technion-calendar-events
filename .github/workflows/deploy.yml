@@ -15,6 +15,8 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout main
         uses: actions/checkout@v6
@@ -40,6 +42,8 @@ jobs:
       - name: Generate static site
         run: |
           python -u fetch_and_parse_ical.py ./gh-pages
+        env:
+          ICS_URL_OVERRIDE: ${{ secrets.ICS_URL_OVERRIDE }}
 
       - name: Commit changes
         run: |

@@ -2,7 +2,8 @@ import json
 import os
 import re
 import sys
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
+from typing import Any
 
 import requests
 from icalendar import Calendar
@@ -10,11 +11,11 @@ from icalendar import Calendar
 ICS_URL = "https://www.admin.technion.ac.il/dpcalendar/Student.ics"
 
 
-def to_date(dt):
+def to_date(dt: date | datetime) -> date:
     return dt.date() if isinstance(dt, datetime) else dt
 
 
-def is_no_class_event(summary):
+def is_no_class_event(summary: str) -> bool:
     no_class_phrases = {
         "אין לימודים",
         "אין פעילות טכניונית",
@@ -32,7 +33,7 @@ def is_no_class_event(summary):
     return False
 
 
-def parse_semester_event(summary):
+def parse_semester_event(summary: str) -> tuple[bool, str] | None:
     """Parse a semester boundary event. Returns (is_start, sem_code) or None."""
     semester_re = re.compile(
         r"(^|,\s*)"
@@ -73,16 +74,22 @@ def parse_semester_event(summary):
     return is_start, sem_type
 
 
-def academic_year(event_date, sem_type):
+def academic_year(event_date: date, sem_type: str) -> int:
     if sem_type == "01":
         return event_date.year if event_date.month >= 8 else event_date.year - 1
     return event_date.year - 1
 
 
-def fetch_and_parse():
-    resp = requests.get(ICS_URL)
+def fetch_ics() -> str:
+    url = os.environ.get("ICS_URL_OVERRIDE", ICS_URL)
+    resp = requests.get(url)
     resp.raise_for_status()
-    cal = Calendar.from_ical(resp.content)
+    return resp.text
+
+
+def fetch_and_parse() -> dict[str, Any]:
+    content = fetch_ics()
+    cal = Calendar.from_ical(content)
 
     semesters = {}
     off_days = set()
@@ -140,11 +147,11 @@ def fetch_and_parse():
     return result
 
 
-def format_json(data):
+def format_json(data: Any) -> str:
     return json.dumps(data, indent=2, ensure_ascii=False)
 
 
-def main():
+def main() -> None:
     output_path = sys.argv[1] if len(sys.argv) > 1 else "-"
     result = fetch_and_parse()
 

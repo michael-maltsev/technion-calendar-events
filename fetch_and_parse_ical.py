@@ -8,7 +8,7 @@ from typing import Any
 import requests
 from icalendar import Calendar
 
-ICS_URL = "https://www.admin.technion.ac.il/dpcalendar/Student.ics"
+ICS_URL = "https://calendars.technion.ac.il/wp-json/r34icspro/v5/ics/6357932be5d1b11a5426888c6e3d9acf43acd7bd/students"
 
 
 def to_date(dt: date | datetime) -> date:
@@ -20,7 +20,13 @@ def is_no_class_event(summary: str) -> bool:
         "אין לימודים",
         "אין פעילות טכניונית",
         "אין פעילות טכניניות",
+        "לא מתקיימת פעילות בטכניון",
         "לא מתקיימת פעילות טכניונית",
+        "אין לימודים ואין לקיים מבחנים",
+
+        # Buggy entries:
+        "אין פעילות טכניוני��",
+        "לא מתקיימת פעילות בטכני��ן",
     }
 
     chunks = re.split(r"[,.\-]", summary)

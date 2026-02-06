@@ -1,6 +1,7 @@
-# Technion Schedule
+# Technion Calendar Events
 
-Fetches the [Technion academic calendar](https://www.admin.technion.ac.il/dpcalendar/Student.ics) and extracts semester dates and days off into structured JSON.
+Fetches the [Technion academic calendar](https://calendars.technion.ac.il/) and
+extracts semester dates and days off into structured JSON.
 
 ## Output format
 
@@ -22,7 +23,8 @@ Semester codes:
 | `02` | Spring   |
 | `03` | Summer   |
 
-The year portion is the academic year start - `202601` is winter 2026-2027, `202602` is spring 2027.
+The year portion is the academic year start - `202601` is winter 2026-2027,
+`202602` is spring 2027.
 
 ## Usage
 
@@ -42,4 +44,5 @@ Output files when writing to a directory:
 
 ## CI/CD
 
-A GitHub Actions workflow (`.github/workflows/deploy.yml`) runs daily, fetches the calendar, and publishes the JSON files to the `gh-pages` branch.
+A GitHub Actions workflow (`.github/workflows/deploy.yml`) runs daily, fetches
+the calendar, and publishes the JSON files to the `gh-pages` branch.

@@ -40,10 +40,16 @@ jobs:
           pip install -r requirements.txt
 
       - name: Generate static site
-        run: |
-          python -u fetch_and_parse_ical.py ./gh-pages
         env:
-          ICS_URL_OVERRIDE: ${{ secrets.ICS_URL_OVERRIDE }}
+          PROXY_SERVER_URL: ${{ secrets.PROXY_SERVER_URL }}
+        run: |
+          PROXY_ARG=""
+          if [ -n "$PROXY_SERVER_URL" ]; then
+            PROXY_SERVER=$(curl -sf "$PROXY_SERVER_URL")
+            echo "::add-mask::$PROXY_SERVER"
+            PROXY_ARG="--proxy-server=$PROXY_SERVER"
+          fi
+          python -u fetch_and_parse_ical.py ./gh-pages $PROXY_ARG
 
       - name: Commit changes
         run: |

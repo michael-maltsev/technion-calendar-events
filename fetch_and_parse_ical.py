@@ -1,7 +1,7 @@
+import argparse
 import json
 import os
 import re
-import sys
 from datetime import date, datetime, timedelta
 from typing import Any
 
@@ -23,7 +23,6 @@ def is_no_class_event(summary: str) -> bool:
         "לא מתקיימת פעילות בטכניון",
         "לא מתקיימת פעילות טכניונית",
         "אין לימודים ואין לקיים מבחנים",
-
         # Buggy entries:
         "אין פעילות טכניוני��",
         "לא מתקיימת פעילות בטכני��ן",
@@ -86,15 +85,16 @@ def academic_year(event_date: date, sem_type: str) -> int:
     return event_date.year - 1
 
 
-def fetch_ics() -> str:
+def fetch_ics(proxy: str | None = None) -> str:
     url = os.environ.get("ICS_URL_OVERRIDE", ICS_URL)
-    resp = requests.get(url)
+    proxies = {"http": proxy, "https": proxy} if proxy else None
+    resp = requests.get(url, proxies=proxies)
     resp.raise_for_status()
     return resp.text
 
 
-def fetch_and_parse() -> dict[str, Any]:
-    content = fetch_ics()
+def fetch_and_parse(proxy: str | None = None) -> dict[str, Any]:
+    content = fetch_ics(proxy)
     cal = Calendar.from_ical(content)
 
     semesters = {}
@@ -158,8 +158,19 @@ def format_json(data: Any) -> str:
 
 
 def main() -> None:
-    output_path = sys.argv[1] if len(sys.argv) > 1 else "-"
-    result = fetch_and_parse()
+    parser = argparse.ArgumentParser(
+        description="Fetch and parse Technion iCal calendar"
+    )
+    parser.add_argument(
+        "output_path", nargs="?", default="-", help="Output directory or '-' for stdout"
+    )
+    parser.add_argument(
+        "--proxy-server", metavar="URL", help="Proxy server URL (e.g. http://host:port)"
+    )
+    args = parser.parse_args()
+
+    output_path = args.output_path
+    result = fetch_and_parse(proxy=args.proxy_server)
 
     if output_path == "-":
         print(format_json(result))

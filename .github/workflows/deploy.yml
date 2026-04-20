@@ -40,8 +40,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Generate static site
-        env:
-          PROXY_SERVER_URL: ${{ secrets.PROXY_SERVER_URL }}
+        # env:
+        #   PROXY_SERVER_URL: ${{ secrets.PROXY_SERVER_URL }}
         run: |
           PROXY_ARG=""
           if [ -n "$PROXY_SERVER_URL" ]; then
